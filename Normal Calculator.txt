@@ -1,0 +1,395 @@
+INCLUDE Irvine32.inc
+
+.data
+	titlemsg BYTE "--------------NORMAL CALCULATOR--------------", 0 
+    menu BYTE "Select operation:", 0
+
+    addMsg BYTE "1. Addition", 0
+	subMsg BYTE "2. Subtraction", 0
+	mulMsg BYTE "3. Multiplication", 0
+    divMsg BYTE "4. Division", 0
+    sqrtMsg BYTE "5. Square Root", 0
+    SquareMsg BYTE "6. Square ", 0
+    CubeMsg BYTE "7. Cube", 0
+    percentageMsg BYTE "8. Percentage", 0
+	zeroMsg BYTE "Can't divide by 0", 0
+
+
+    percentageInput BYTE "Enter part: ", 0
+    numToCalculatePercentage BYTE "Enter whole: ", 0
+    
+	input1 BYTE "Enter first number: ", 0
+    input2 BYTE "Enter second number: ", 0
+    
+	result BYTE "Result: ", 0
+    
+	choice DWORD ?
+    
+	num1 DWORD ?
+    num2 DWORD ?
+    
+	res DWORD ?
+    
+	minusSign BYTE "-", 0
+    
+	choiceChar BYTE ?
+    
+	prompt BYTE "Do you want to use the calculator again? (Y/N): ", 0
+    invalidChoiceMsg BYTE "Please select an option between 1 - 8. Invalid choice.", 0
+    invalidInputMsg BYTE "Invalid input. Please enter a number.", 0
+
+.code
+
+
+	calculatePercentage PROC
+		mov eax, num1
+		imul eax, 100
+		cdq
+		idiv num2
+		mov res, eax
+		ret
+	calculatePercentage ENDP
+
+	addNumbers PROC
+		mov eax, num1
+		add eax, num2
+		mov res, eax
+		ret
+	addNumbers ENDP
+
+	subNumbers PROC
+		mov eax, num1
+		sub eax, num2
+		mov res, eax
+		ret
+	subNumbers ENDP
+
+	mulNumbers PROC
+		mov eax, num1
+		mov ebx, num2
+		imul ebx
+		mov res, eax
+		ret
+	mulNumbers ENDP
+
+	divNumbers PROC
+		mov eax, num1
+		cdq
+		cmp num2, 0           
+		je DivideByZero       
+
+		idiv num2
+		mov res, eax
+		ret
+
+	DivideByZero:
+		mov edx, OFFSET zeroMsg 
+		call WriteString        
+		mov res, -1             
+		ret
+	divNumbers ENDP
+
+	sqrtNumber PROC
+		lea eax, num1
+		fild dword ptr [eax]
+		fsqrt
+		fistp dword ptr [res]
+		ret
+	sqrtNumber ENDP
+
+	squareNumber PROC
+		mov eax, num1
+		imul eax, num1
+		mov res, eax
+		ret
+	squareNumber ENDP
+
+	cubeNumber PROC
+		mov eax, num1
+		imul eax, num1
+		imul eax, num1
+		mov res, eax
+		ret
+	cubeNumber ENDP
+
+	displayMenu PROC
+		mov edx,offset Titlemsg
+		call writestring
+		call crlf
+    
+		mov edx, OFFSET menu
+		call WriteString
+		call Crlf
+    
+		mov edx, OFFSET addMsg
+		call WriteString
+		call Crlf
+
+		mov edx, OFFSET subMsg
+		call WriteString
+		call Crlf
+
+		mov edx, OFFSET mulMsg
+		call WriteString
+		call Crlf
+
+		mov edx, OFFSET divMsg
+		call WriteString
+		call Crlf
+
+		mov edx, OFFSET sqrtMsg
+		call WriteString
+		call Crlf
+
+		mov edx, OFFSET SquareMsg
+		call WriteString
+		call Crlf
+
+		mov edx, OFFSET CubeMsg
+		call WriteString
+		call Crlf
+
+		mov edx, OFFSET percentageMsg
+		call WriteString
+		call Crlf
+
+		call Crlf
+		call ReadInt
+		mov choice, eax
+		ret
+	displayMenu ENDP
+
+	validateInput PROC
+		call ReadInt
+		jc InvalidInput
+		ret
+	InvalidInput:
+		mov edx, OFFSET invalidInputMsg
+		call WriteString
+		call Crlf
+		ret
+	validateInput ENDP
+
+main PROC
+	CalcMenu:
+		call displayMenu
+		mov eax, choice
+		call WriteDec
+		call Crlf
+		call Crlf
+
+		cmp choice, 1
+		je Addition
+
+		cmp choice, 2
+		je Subtraction
+
+		cmp choice, 3
+		je Multiplication
+
+		cmp choice, 4
+		je Division
+
+		cmp choice, 5
+		je SquareRoot
+		
+		cmp choice, 6
+		je Square
+		
+		cmp choice, 7
+		je Cube
+		
+		cmp choice, 8
+		je Percentage
+		
+		jmp InvalidChoice
+
+	Addition:
+		mov edx, OFFSET addMsg
+		call WriteString
+		call Crlf
+		call Crlf
+
+		mov edx, OFFSET input1
+		call WriteString
+		call validateInput
+		mov num1, eax
+
+		mov edx, OFFSET input2
+		call WriteString
+		call validateInput
+		mov num2, eax
+
+		call addNumbers
+		jmp DisplayResult
+
+	Subtraction:
+		mov edx, OFFSET subMsg
+		call WriteString
+		call Crlf
+		call Crlf
+
+		mov edx, OFFSET input1
+		call WriteString
+		call validateInput
+		mov num1, eax
+
+		mov edx, OFFSET input2
+		call WriteString
+		call validateInput
+		mov num2, eax
+
+		call subNumbers
+		jmp DisplayResult
+
+	Multiplication:
+		mov edx, OFFSET mulMsg
+		call WriteString
+		call Crlf
+		call Crlf
+
+		mov edx, OFFSET input1
+		call WriteString
+		call validateInput
+		mov num1, eax
+
+		mov edx, OFFSET input2
+		call WriteString
+		call validateInput
+		mov num2, eax
+
+		call mulNumbers
+		jmp DisplayResult
+
+	Division:
+		mov edx, OFFSET divMsg
+		call WriteString
+		call Crlf
+		call Crlf
+
+		mov edx, OFFSET input1
+		call WriteString
+		call validateInput
+		mov num1, eax
+
+		mov edx, OFFSET input2
+		call WriteString
+		call validateInput
+		mov num2, eax
+
+		call divNumbers
+		jmp DisplayResult
+
+	SquareRoot:
+		mov edx, OFFSET sqrtMsg
+		call WriteString
+		call Crlf
+		call Crlf
+
+		mov edx, OFFSET input1
+		call WriteString
+		call validateInput
+		mov num1, eax
+
+		call sqrtNumber
+		jmp DisplayResult
+
+	Square:
+		mov edx, OFFSET SquareMsg
+		call WriteString
+		call Crlf
+		call Crlf
+
+		mov edx, OFFSET input1
+		call WriteString
+		call validateInput
+		mov num1, eax
+
+		call squareNumber
+		jmp DisplayResult
+
+	Cube:
+		mov edx, OFFSET CubeMsg
+		call WriteString
+		call Crlf
+		call Crlf
+
+		mov edx, OFFSET input1
+		call WriteString
+		call validateInput
+		mov num1, eax
+
+		call cubeNumber
+		jmp DisplayResult
+
+	Percentage:
+		mov edx, OFFSET percentageMsg
+		call WriteString
+		call Crlf
+		call Crlf
+
+		mov edx, OFFSET percentageInput
+		call WriteString
+		call validateInput
+		mov num1, eax
+
+		mov edx, OFFSET numToCalculatePercentage
+		call WriteString
+		call validateInput
+		mov num2, eax
+
+		call calculatePercentage
+		jmp DisplayResult
+
+	InvalidChoice:
+		mov edx, OFFSET invalidChoiceMsg
+		call WriteString
+		call Crlf
+		call Crlf
+		jmp CalcMenu
+
+	DisplayResult:
+		mov edx, OFFSET result
+		call WriteString
+		call Crlf
+
+		mov eax, res
+		test eax, eax
+		jns PositiveResult
+		mov edx, OFFSET minusSign
+		call WriteString
+		neg eax
+
+		jmp DisplayAbsolute
+	PositiveResult:
+		mov eax, res
+	DisplayAbsolute:
+		call WriteDec
+		call Crlf
+		call Crlf
+		call AskAgain
+		jmp CalcMenu
+
+	AskAgain:
+		mov edx, OFFSET prompt
+		call WriteString
+		call ReadChar
+		mov choiceChar, al
+		call Crlf
+		call Crlf
+
+		cmp choiceChar, 'y'
+		je CalcMenu
+		cmp choiceChar, 'Y'
+		je CalcMenu
+		cmp choiceChar, 'n'
+		je ExitProgram
+		cmp choiceChar, 'N'
+		je ExitProgram
+		jmp AskAgain
+
+	ExitProgram:
+		Exit
+
+main ENDP
+END main
